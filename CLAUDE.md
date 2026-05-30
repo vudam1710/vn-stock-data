@@ -90,3 +90,10 @@ github_actions/
 - Không cần phân tích predictive (forecast). Chỉ cần descriptive + recommendation.
 - Report phải đọc được trong 2 phút — ưu tiên bảng và bullet points, không viết dài.
 - Nếu một mã thiếu data (thị trường nghỉ, lỗi fetch), bỏ qua và note trong report.
+- Sau khi tạo report xong, ghi ngày mới nhất của data vào `logs/last_analyzed.txt`.
+
+## Token efficiency — BẮT BUỘC tuân theo
+
+- **Không chạy full pipeline ai_analyst** — chỉ dùng đúng 3 agent: `descriptive-analyst`, `story-builder`, `html-report`. Bỏ qua tất cả agent khác.
+- **Không đọc reference docs** của skill trừ khi thực sự cần — ưu tiên dùng kiến thức sẵn có.
+- **Không giải thích từng bước** trong quá trình chạy — chỉ báo khi xong hoặc khi có lỗi.
