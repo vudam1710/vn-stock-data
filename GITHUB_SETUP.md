@@ -1,45 +1,65 @@
-# Hướng dẫn Setup GitHub Actions — VN Stock Daily Fetch
+# VN Stock Pipeline — Hướng dẫn Setup
 
-Máy không cần bật. GitHub chạy script trên server của họ mỗi ngày, tự commit data vào repo.
+## Tổng quan pipeline
+
+```
+18:00  GitHub Actions (daily_fetch.yml)
+       → fetch_stock.py kéo data → commit stock_data.csv
+       → Check: data có fresh không?
+
+19:00  Claude Routine
+       → Check: data có mới không? (so với last_analyzed.txt)
+       → Chạy phân tích + tạo report HTML
+       → Push report lên repo
+
+20:00  GitHub Actions (daily_email.yml)
+       → Check: có report HTML hôm nay không?
+       → Nếu có → gửi email tóm tắt
+       → Nếu không → bỏ qua (agent chưa chạy xong hoặc lỗi)
+```
+
+> Mỗi bước tự validate đầu vào trước khi chạy. Bước sau không chạy nếu bước trước chưa có output.
 
 ---
 
 ## Cấu trúc repo
 
 ```
-github_actions/               ← đây là GitHub repo root
+vn-stock-data/                    ← GitHub repo root
 ├── .github/
 │   └── workflows/
-│       └── daily_fetch.yml   ← lịch chạy tự động
-├── ai_analyst/               ← agent phân tích (giữ nguyên cấu trúc)
+│       ├── daily_fetch.yml       ← 18:00: kéo data
+│       └── daily_email.yml       ← 20:00: gửi email
+├── ai_analyst/                   ← agent phân tích
 ├── data/
-│   └── stock_data.csv        ← tự động tạo sau lần chạy đầu
-├── reports/                  ← HTML report hàng ngày
-├── CLAUDE.md                 ← instructions cho agent
-├── config.yaml               ← cấu hình tickers, nguồn data
-├── fetch_stock.py            ← script kéo data
+│   └── stock_data.csv            ← tự động tạo sau lần chạy đầu
+├── logs/
+│   ├── fetch.log                 ← log mỗi lần fetch
+│   └── last_analyzed.txt         ← ngày agent chạy lần cuối
+├── reports/
+│   └── stock_report_YYYY-MM-DD.html  ← report hàng ngày
+├── CLAUDE.md                     ← instructions cho Claude Routine
+├── config.yaml                   ← cấu hình tickers, nguồn data
+├── fetch_stock.py                ← script kéo data
+├── send_summary.py               ← script gửi email
 └── requirements.txt
 ```
 
-> Muốn thêm/bớt mã cổ phiếu hoặc đổi cấu hình → **chỉ sửa `config.yaml`**.
+> Muốn thêm/bớt mã hoặc đổi cấu hình → **chỉ sửa `config.yaml`**.
 
 ---
 
-## Bước 1 — Tạo repo mới trên GitHub
+## Bước 1 — Tạo repo trên GitHub
 
 1. Vào https://github.com → click **"New"**
-2. Điền:
-   - **Repository name**: `vn-stock-data` (hoặc tên bất kỳ)
-   - **Visibility**: `Private` (khuyến nghị)
+2. Điền **Repository name**: `vn-stock-data`, **Visibility**: `Private`
 3. Click **"Create repository"**
 
 ---
 
 ## Bước 2 — Upload files lên repo
 
-Upload toàn bộ nội dung folder `github_actions/` lên repo, giữ đúng cấu trúc thư mục.
-
-**Cách nhanh nhất — dùng Git:**
+**Dùng Git (nhanh nhất):**
 
 ```bash
 cd "path/to/github_actions"
@@ -50,77 +70,156 @@ git commit -m "initial setup"
 git push -u origin main
 ```
 
-**Nếu không dùng Git — upload thủ công:**
-
-File `daily_fetch.yml` cần tạo đúng đường dẫn:
-1. Click **"Add file"** → **"Create new file"**
-2. Gõ tên: `.github/workflows/daily_fetch.yml` (gõ `/` để tạo thư mục)
-3. Copy nội dung file vào → **"Commit changes"**
-
-Các file còn lại upload qua **"Add file"** → **"Upload files"**.
+**Upload thủ công:** Tạo `.github/workflows/daily_fetch.yml` bằng cách vào **"Add file"** → **"Create new file"**, gõ tên file có dấu `/` để tạo thư mục. Các file còn lại upload qua **"Upload files"**.
 
 ---
 
-## Bước 3 — Cấp quyền write cho Actions
+## Bước 3 — Cấp quyền write cho GitHub Actions
 
-1. Vào **Settings** → **Actions** → **General**
-2. Kéo xuống **Workflow permissions**
-3. Chọn **"Read and write permissions"** → **Save**
-
-> Bước này bắt buộc để Actions có thể commit `stock_data.csv` vào repo.
+Vào repo → **Settings** → **Actions** → **General** → **Workflow permissions** → chọn **"Read and write permissions"** → **Save**.
 
 ---
 
-## Bước 4 — Test chạy thủ công lần đầu
+## Bước 4 — Test fetch data lần đầu
 
-1. Vào tab **"Actions"**
-2. Click **"VN Stock Daily Fetch"** ở cột trái
-3. Click **"Run workflow"** → **"Run workflow"**
-4. Chờ ~2 phút → kiểm tra tab **"Code"** có thư mục `data/stock_data.csv` chưa
+1. Vào tab **Actions** → click **"VN Stock Daily Fetch"** → **"Run workflow"**
+2. Chờ ~2 phút → kiểm tra tab **Code** có `data/stock_data.csv` chưa
 
-Lần đầu chạy sẽ fetch **30 ngày gần nhất** (~300 dòng).
+Lần đầu fetch **90 ngày gần nhất** (~900 dòng).
 
 ---
 
-## Bước 5 — Chạy agent phân tích (local)
+## Bước 5 — Cấp quyền push cho Claude Routine (PAT)
 
-Sau khi có data, mở Claude Code và chạy:
+Claude Routine cần PAT để tự push report lên repo.
 
-```bash
-cd "path/to/github_actions"
-claude
+### 5a — Tạo PAT
+
+1. Vào https://github.com/settings/tokens?type=beta → **"Generate new token"**
+2. Điền:
+   - **Token name**: `vn-stock-routine`
+   - **Expiration**: 90 ngày
+   - **Repository access**: Only select repositories → `vn-stock-data`
+   - **Permissions** → **Contents**: `Read and write`
+3. **Generate token** → copy ngay (chỉ hiện 1 lần)
+
+### 5b — Nhúng PAT vào Routine Instructions
+
+Thêm vào đầu Instructions của Claude Routine:
+
+```
+Trước khi push, chạy lệnh:
+git remote set-url origin https://<YOUR_PAT>@github.com/your-username/vn-stock-data.git
 ```
 
-Nói: **"chạy phân tích hôm nay"** — agent tự đọc `CLAUDE.md`, xử lý data, tạo report tại `reports/stock_report_YYYY-MM-DD.html`.
+> ⚠️ Không share routine này với ai. Khi PAT hết hạn → tạo token mới → update Instructions.
 
 ---
 
-## Lịch chạy tự động
+## Bước 6 — Setup Claude Routine (phân tích)
 
-Data fetch tự động lúc **18:00 giờ Việt Nam, thứ 2 đến thứ 6**.
+Tạo Claude Routine với:
 
-> GitHub Actions dùng UTC. Lịch trong `daily_fetch.yml` là `0 11 * * 1-5` (11:00 UTC = 18:00 ICT).
+| Setting | Giá trị |
+|---|---|
+| **Trigger** | Weekdays, 19:00 |
+| **Connector** | repo `vn-stock-data` |
+| **Model** | Haiku (tiết kiệm token) |
+
+**Instructions — copy nguyên đoạn sau vào ô Instructions:**
+
+```
+Trước khi push, chạy lệnh sau để dùng PAT:
+git remote set-url origin https://<YOUR_PAT>@github.com/your-username/vn-stock-data.git
+
+---
+
+Đọc CLAUDE.md trong repo để hiểu pipeline, sau đó thực hiện theo thứ tự:
+
+Bước 0 — Kiểm tra trước khi chạy:
+- Nếu data/stock_data.csv không tồn tại → dừng, báo lỗi
+- Nếu ngày mới nhất trong CSV cách hôm nay quá 3 ngày → dừng, báo "data cũ, fetch có thể bị lỗi"
+- Nếu logs/last_analyzed.txt tồn tại và ngày trong đó == ngày mới nhất trong CSV → dừng, báo "đã phân tích rồi"
+
+Bước 1 — Tính metrics cho từng ticker (chỉ đọc 30 ngày gần nhất từ CSV):
+- Return 30D, Volatility, Trend, Volume trend
+
+Bước 2 — Xếp hạng và phân loại:
+- Top 3: nên xem xét
+- Mid: theo dõi thêm
+- Bottom: tránh / chờ
+
+Bước 3 — Tạo HTML report 1 trang tại reports/stock_report_{YYYY-MM-DD}.html
+
+Bước 4 — Push report lên repo
+
+Bước 5 — Ghi ngày mới nhất của data vào logs/last_analyzed.txt
+
+Lưu ý token efficiency:
+- Không đọc toàn bộ CSV, chỉ lấy 30 ngày gần nhất
+- Không chạy full pipeline ai_analyst, chỉ dùng: descriptive-analyst, story-builder, html-report
+- Không giải thích từng bước, chỉ báo khi xong hoặc lỗi
+```
+
+> Thay `<YOUR_PAT>` và `your-username` bằng thông tin thực của bạn.
+
+**Validation trong Routine (tự động):**
+- Kiểm tra `stock_data.csv` tồn tại
+- Kiểm tra data không quá 3 ngày cũ
+- Kiểm tra chưa phân tích data này rồi (so với `last_analyzed.txt`)
+
+---
+
+## Bước 7 — Setup gửi email (tùy chọn)
+
+Email gửi lúc 20:00 sau khi Routine phân tích xong. Script tự check có report hôm nay chưa trước khi gửi — nếu Routine chưa chạy xong thì bỏ qua.
+
+### 7a — Tạo Gmail App Password
+
+Vào https://myaccount.google.com/apppasswords → tạo password tên `vn-stock-github` → copy 16 ký tự.
+
+> Nếu không thấy mục này: account dùng Passkey hoặc Google Workspace — Google chặn tính năng này, không có workaround.
+
+### 7b — Thêm GitHub Secrets
+
+Vào repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
+
+| Secret name | Value |
+|---|---|
+| `GMAIL_USER` | your-email@gmail.com |
+| `GMAIL_APP_PASSWORD` | 16 ký tự vừa tạo |
+| `EMAIL_TO` | email nhận (có thể giống GMAIL_USER) |
+
+Workflow `daily_email.yml` đã cấu hình sẵn, không cần thêm gì.
 
 ---
 
 ## Tùy chỉnh
 
-| Muốn thay đổi | Sửa file |
+| Muốn thay đổi | Sửa ở đâu |
 |---|---|
 | Thêm/bớt mã cổ phiếu | `config.yaml` → `tickers` |
 | Số ngày fetch lần đầu | `config.yaml` → `fetch.lookback_days` |
 | Nguồn data | `config.yaml` → `fetch.source` |
-| Giờ chạy tự động | `.github/workflows/daily_fetch.yml` → `cron` |
+| Số mã top picks trong email | `config.yaml` → `report.top_picks` |
+| Giờ fetch | `daily_fetch.yml` → `cron` |
+| Giờ gửi email | `daily_email.yml` → `cron` |
 
 ---
 
 ## Troubleshooting
 
+### Lỗi 403 khi Routine push
+Toggle "Allow unrestricted git push" không hoạt động ổn định — dùng PAT theo Bước 5.
+
+### PAT hết hạn
+Vào https://github.com/settings/tokens?type=beta → tạo token mới → update Instructions của Routine.
+
+### Routine báo "Data cũ" hoặc "Đã phân tích rồi"
+Bình thường — cuối tuần, ngày lễ, hoặc đã chạy trong ngày.
+
+### Email không gửi dù Routine đã chạy
+Kiểm tra: report có trong thư mục `reports/` trên GitHub không? Nếu không → Routine bị lỗi lúc push. Xem log trong tab Actions.
+
 ### Actions không chạy tự động
-Repo private free có giới hạn 2000 phút/tháng. Script chạy ~2 phút/ngày → ~40 phút/tháng, hoàn toàn trong giới hạn. Kiểm tra tab Actions xem có lỗi không.
-
-### Lỗi permission khi commit CSV
-Làm lại Bước 3 — cấp "Read and write permissions".
-
-### Script báo "Data đã up-to-date"
-Bình thường — không có ngày mới cần fetch (cuối tuần hoặc ngày lễ).
+Repo private free có 2000 phút/tháng. Pipeline này dùng ~4 phút/ngày → ~80 phút/tháng, trong giới hạn.
