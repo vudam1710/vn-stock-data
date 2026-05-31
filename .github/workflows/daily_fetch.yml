@@ -36,3 +36,4 @@ jobs:
           git add data/stock_data.csv logs/fetch.log
           git diff --staged --quiet || git commit -m "data: daily fetch $(date +'%Y-%m-%d')"
           git push
+
