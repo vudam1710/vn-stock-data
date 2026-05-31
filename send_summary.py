@@ -162,7 +162,7 @@ def send_email(html_body):
 
 def get_latest_report() -> Path | None:
     """Tìm report HTML mới nhất trong vòng 3 ngày gần nhất."""
-    reports_dir = Path("reports")
+    reports_dir = Path("data/reports")
     if not reports_dir.exists():
         return None
     cutoff = date.today() - timedelta(days=3)
