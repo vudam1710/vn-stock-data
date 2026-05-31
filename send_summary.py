@@ -160,14 +160,28 @@ def send_email(html_body):
 
 # ─── MAIN ────────────────────────────────────────────────────────────────────
 
-def check_report_exists() -> bool:
-    """Kiểm tra có report HTML được tạo hôm nay không."""
+def get_latest_report() -> Path | None:
+    """Tìm report HTML mới nhất trong vòng 3 ngày gần nhất."""
     reports_dir = Path("reports")
     if not reports_dir.exists():
-        return False
-    today_str = date.today().strftime("%Y-%m-%d")
-    matches = list(reports_dir.glob(f"*{today_str}*.html"))
-    return len(matches) > 0
+        return None
+    cutoff = date.today() - timedelta(days=3)
+    candidates = []
+    for f in reports_dir.glob("*.html"):
+        # Lấy ngày từ tên file (pattern: *YYYY-MM-DD*.html)
+        for part in f.stem.split("_"):
+            try:
+                file_date = date.fromisoformat(part)
+                if file_date >= cutoff:
+                    candidates.append((file_date, f))
+                break
+            except ValueError:
+                continue
+    if not candidates:
+        return None
+    # Trả về file có ngày mới nhất
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    return candidates[0][1]
 
 
 if __name__ == "__main__":
@@ -176,10 +190,12 @@ if __name__ == "__main__":
         print("Không tìm thấy stock_data.csv. Bỏ qua gửi email.")
         sys.exit(0)
 
-    # Check 2: có report mới không
-    if not check_report_exists():
-        print(f"Chưa có report HTML cho ngày {TODAY}. Agent phân tích chưa chạy xong hoặc bị lỗi. Bỏ qua gửi email.")
+    # Check 2: có report trong 3 ngày gần nhất không
+    latest_report = get_latest_report()
+    if latest_report is None:
+        print("Không tìm thấy report HTML trong 3 ngày gần nhất. Bỏ qua gửi email.")
         sys.exit(0)
+    print(f"Dùng report: {latest_report.name}")
 
     data = read_csv()
     metrics = compute_metrics(data)
