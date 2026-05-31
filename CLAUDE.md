@@ -17,6 +17,20 @@ Mỗi ngày sau khi `stock_data.csv` được cập nhật, chạy phân tích v
 
 ## Nhiệm vụ khi được gọi
 
+### Bước 0 — Kiểm tra data trước khi chạy
+
+**0a — Kiểm tra data có tồn tại không:**
+- Nếu `data/stock_data.csv` không tồn tại → báo lỗi và dừng.
+
+**0b — Kiểm tra data có fresh không:**
+- Đọc ngày mới nhất trong `data/stock_data.csv` (cột `Date`)
+- Nếu ngày mới nhất cách hôm nay quá 3 ngày → báo "Data cũ ({ngày}), có thể fetch bị lỗi. Dừng." và thoát.
+
+**0c — Kiểm tra đã phân tích chưa:**
+- Đọc ngày trong `logs/last_analyzed.txt` (nếu file tồn tại)
+- Nếu `last_analyzed` == ngày mới nhất trong CSV → báo "Đã phân tích data này rồi. Dừng." và thoát.
+- Nếu khác hoặc chưa có file → tiếp tục.
+
 ### Bước 1 — Đọc và tính toán
 
 Đọc `data/stock_data.csv` — dùng **toàn bộ data có sẵn**, không giới hạn số ngày.
