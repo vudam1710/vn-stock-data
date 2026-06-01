@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VN Stock Daily Briefing — 2026-06-01</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; font-size: 13px; }
+  .page { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+  .subtitle { color: #64748b; font-size: 0.8rem; margin-bottom: 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .card { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .card h2 { font-size: 0.85rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 0.75rem; color: #94a3b8; font-weight: 600; padding: 4px 8px; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  .pos { color: #16a34a; font-weight: 600; }
+  .neg { color: #dc2626; font-weight: 600; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+  .badge.green { background: #dcfce7; color: #15803d; }
+  .badge.yellow { background: #fef9c3; color: #a16207; }
+  .badge.red { background: #fee2e2; color: #b91c1c; }
+  .chart-wrap { position: relative; height: 220px; }
+  .picks { background: #fff; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .picks h2 { font-size: 0.85rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+  .picks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .pick-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; }
+  .pick-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .pick-ticker { font-size: 1.1rem; font-weight: 700; color: #15803d; }
+  .pick-meta { font-size: 0.75rem; color: #475569; }
+  .pick-text { font-size: 0.78rem; color: #334155; line-height: 1.5; }
+  .footer { text-align: center; color: #94a3b8; font-size: 0.72rem; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>VN Stock Daily Briefing — 2026-06-01</h1>
+  <div class="subtitle">Phân tích 10 mã theo dõi &nbsp;·&nbsp; Dữ liệu đến 2026-06-01 &nbsp;·&nbsp; Tự động tạo bởi VN Stock Analyst</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Bảng tóm tắt 10 mã</h2>
+      <table>
+        <thead>
+          <tr><th>Ticker</th><th>Return 30D</th><th>Volatility</th><th>Trend</th><th>Khuyến nghị</th></tr>
+        </thead>
+        <tbody>
+    <tr>
+      <td><strong>VCB</strong></td>
+      <td class="pos">+4.7%</td>
+      <td>1.96%</td>
+      <td>↑ tăng</td>
+      <td><span class="badge green">✅ Nên xem xét</span></td>
+    </tr>
+    <tr>
+      <td><strong>TCB</strong></td>
+      <td class="pos">+3.5%</td>
+      <td>2.13%</td>
+      <td>↑ tăng</td>
+      <td><span class="badge green">✅ Nên xem xét</span></td>
+    </tr>
+    <tr>
+      <td><strong>VIC</strong></td>
+      <td class="pos">+8.2%</td>
+      <td>3.36%</td>
+      <td>↑ tăng</td>
+      <td><span class="badge green">✅ Nên xem xét</span></td>
+    </tr>
+    <tr>
+      <td><strong>BID</strong></td>
+      <td class="pos">+4.2%</td>
+      <td>2.14%</td>
+      <td>→ sideway</td>
+      <td><span class="badge yellow">⚠️ Theo dõi thêm</span></td>
+    </tr>
+    <tr>
+      <td><strong>VHM</strong></td>
+      <td class="pos">+6.2%</td>
+      <td>3.62%</td>
+      <td>↑ tăng</td>
+      <td><span class="badge yellow">⚠️ Theo dõi thêm</span></td>
+    </tr>
+    <tr>
+      <td><strong>MSN</strong></td>
+      <td class="neg">-4.2%</td>
+      <td>1.98%</td>
+      <td>↑ tăng</td>
+      <td><span class="badge yellow">⚠️ Theo dõi thêm</span></td>
+    </tr>
+    <tr>
+      <td><strong>VNM</strong></td>
+      <td class="neg">-3.3%</td>
+      <td>1.71%</td>
+      <td>→ sideway</td>
+      <td><span class="badge yellow">⚠️ Theo dõi thêm</span></td>
+    </tr>
+    <tr>
+      <td><strong>HPG</strong></td>
+      <td class="neg">-3.6%</td>
+      <td>1.80%</td>
+      <td>→ sideway</td>
+      <td><span class="badge red">❌ Tránh / chờ</span></td>
+    </tr>
+    <tr>
+      <td><strong>MBB</strong></td>
+      <td class="neg">-4.6%</td>
+      <td>1.76%</td>
+      <td>→ sideway</td>
+      <td><span class="badge red">❌ Tránh / chờ</span></td>
+    </tr>
+    <tr>
+      <td><strong>FPT</strong></td>
+      <td class="neg">-0.3%</td>
+      <td>2.34%</td>
+      <td>↓ giảm</td>
+      <td><span class="badge red">❌ Tránh / chờ</span></td>
+    </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Hiệu suất 30 ngày (chuẩn hóa về 100)</h2>
+      <div class="chart-wrap">
+        <canvas id="perfChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="picks">
+    <h2>🏆 Top Picks Hôm Nay</h2>
+    <div class="picks-grid">
+    <div class="pick-card">
+      <div class="pick-header">
+        <span class="pick-ticker">VCB</span>
+        <span class="pick-meta">Return 30D: <strong class="pos">+4.7%</strong> &nbsp;|&nbsp; Vol: 1.96%</span>
+      </div>
+      <p class="pick-text">VCB dẫn đầu về điểm risk-adjusted với return 30D +4.7% và volatility thấp (1.96%). Xu hướng tăng bền vững, phù hợp với nhà đầu tư ưu tiên ổn định.</p>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <span class="pick-ticker">TCB</span>
+        <span class="pick-meta">Return 30D: <strong class="pos">+3.5%</strong> &nbsp;|&nbsp; Vol: 2.13%</span>
+      </div>
+      <p class="pick-text">TCB có return tích cực +3.5% cùng volatility hợp lý (2.13%), trend đang tăng. Cổ phiếu ngân hàng tư nhân với nền tảng vốn mạnh.</p>
+    </div>
+    <div class="pick-card">
+      <div class="pick-header">
+        <span class="pick-ticker">VIC</span>
+        <span class="pick-meta">Return 30D: <strong class="pos">+8.2%</strong> &nbsp;|&nbsp; Vol: 3.36%</span>
+      </div>
+      <p class="pick-text">VIC ghi nhận return cao nhất nhóm +8.2% trong 30 ngày, trend tăng rõ ràng. Volatility cao hơn (3.36%) nhưng lợi nhuận bù đắp rủi ro tốt cho nhà đầu tư chấp nhận rủi ro.</p>
+    </div>
+    </div>
+  </div>
+
+  <div class="footer">Báo cáo tự động · 2026-06-01 · Không phải tư vấn tài chính</div>
+</div>
+
+<script>
+const labels = ["2026-04-16", "2026-04-17", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-28", "2026-04-29", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-06-01"];
+const datasets = [{"label": "VCB", "data": [100.0, 100.17, 101.18, 100.34, 100.0, 105.72, 102.02, 100.67, 100.67, 102.19, 100.84, 101.85, 101.52, 102.19, 101.52, 100.84, 101.18, 102.69, 102.19, 106.4, 108.42, 108.75, 109.26, 106.9, 107.24, 108.42, 108.08, 105.72, 104.38, 104.71], "borderColor": "#2563eb", "backgroundColor": "#2563eb20", "borderWidth": 2, "borderDash": [], "tension": 0.3, "pointRadius": 0}, {"label": "TCB", "data": [100.0, 101.12, 102.21, 102.53, 103.46, 104.39, 107.36, 108.48, 106.11, 105.19, 104.39, 106.27, 105.67, 106.11, 105.95, 105.95, 105.35, 106.59, 106.75, 106.59, 104.35, 103.87, 103.23, 103.07, 104.19, 105.31, 107.71, 104.35, 104.83, 103.55], "borderColor": "#16a34a", "backgroundColor": "#16a34a20", "borderWidth": 2, "borderDash": [], "tension": 0.3, "pointRadius": 0}, {"label": "VIC", "data": [100.0, 99.26, 100.9, 102.32, 109.46, 113.31, 112.04, 119.12, 113.05, 111.99, 115.95, 115.95, 118.33, 119.39, 117.8, 117.27, 116.75, 121.39, 120.44, 118.86, 118.91, 119.76, 115.53, 114.37, 115.58, 112.52, 111.36, 111.36, 111.62, 108.24], "borderColor": "#dc2626", "backgroundColor": "#dc262620", "borderWidth": 2, "borderDash": [], "tension": 0.3, "pointRadius": 0}, {"label": "BID", "data": [100.0, 100.25, 100.87, 100.5, 100.12, 103.48, 101.37, 99.88, 99.75, 101.62, 100.87, 101.74, 101.62, 105.47, 103.23, 103.86, 106.47, 108.33, 106.84, 112.69, 110.07, 109.2, 108.96, 106.97, 106.97, 108.46, 107.71, 105.72, 104.48, 104.23], "borderColor": "#d97706", "backgroundColor": "#d9770620", "borderWidth": 1.5, "borderDash": [5, 5], "tension": 0.3, "pointRadius": 0}, {"label": "VHM", "data": [100.0, 94.83, 101.4, 101.89, 105.03, 104.12, 98.67, 105.52, 102.03, 99.23, 105.66, 105.52, 112.86, 114.61, 112.51, 111.95, 106.57, 109.71, 110.41, 107.62, 109.71, 111.74, 111.67, 107.48, 110.9, 107.48, 103.0, 110.2, 109.01, 106.22], "borderColor": "#7c3aed", "backgroundColor": "#7c3aed20", "borderWidth": 1.5, "borderDash": [5, 5], "tension": 0.3, "pointRadius": 0}, {"label": "MSN", "data": [100.0, 101.92, 102.31, 101.28, 101.28, 100.26, 98.97, 99.23, 98.46, 98.46, 98.21, 100.51, 103.85, 102.82, 99.36, 99.62, 101.15, 101.41, 99.36, 98.08, 98.08, 96.92, 97.69, 97.44, 98.97, 98.72, 98.08, 96.79, 95.77, 95.77], "borderColor": "#0891b2", "backgroundColor": "#0891b220", "borderWidth": 1.5, "borderDash": [5, 5], "tension": 0.3, "pointRadius": 0}, {"label": "VNM", "data": [100.0, 100.33, 100.65, 100.82, 101.15, 101.47, 100.49, 100.16, 99.67, 99.67, 100.0, 100.65, 100.65, 99.67, 99.18, 98.36, 97.05, 98.36, 97.87, 99.02, 97.87, 96.73, 96.56, 97.38, 96.73, 96.73, 96.24, 96.56, 96.89, 96.73], "borderColor": "#be185d", "backgroundColor": "#be185d20", "borderWidth": 1.5, "borderDash": [5, 5], "tension": 0.3, "pointRadius": 0}, {"label": "HPG", "data": [100.0, 100.2, 101.8, 102.16, 100.92, 99.48, 99.84, 99.28, 99.28, 98.76, 97.68, 98.76, 99.28, 99.64, 98.4, 98.0, 98.76, 98.56, 96.75, 96.39, 95.63, 95.47, 96.75, 95.99, 96.59, 97.19, 96.79, 96.19, 96.19, 96.39], "borderColor": "#78716c", "backgroundColor": "#78716c20", "borderWidth": 1.5, "borderDash": [2, 2], "tension": 0.3, "pointRadius": 0}, {"label": "MBB", "data": [100.0, 100.57, 100.19, 100.0, 99.62, 100.38, 99.62, 98.86, 99.05, 99.24, 98.67, 99.05, 99.24, 99.43, 98.86, 98.48, 98.1, 98.29, 97.53, 96.96, 95.25, 93.54, 94.3, 93.73, 94.3, 96.96, 96.58, 95.06, 95.06, 95.44], "borderColor": "#64748b", "backgroundColor": "#64748b20", "borderWidth": 1.5, "borderDash": [2, 2], "tension": 0.3, "pointRadius": 0}, {"label": "FPT", "data": [100.0, 102.57, 103.78, 101.35, 100.68, 100.27, 99.06, 100.41, 101.89, 99.47, 100.27, 98.92, 98.52, 97.03, 94.47, 95.28, 95.42, 99.73, 98.39, 101.08, 100.55, 104.86, 103.24, 101.35, 99.19, 100.55, 99.33, 97.41, 97.96, 99.74], "borderColor": "#92400e", "backgroundColor": "#92400e20", "borderWidth": 1.5, "borderDash": [2, 2], "tension": 0.3, "pointRadius": 0}];
+const ctx = document.getElementById('perfChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: { labels, datasets },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: { boxWidth: 12, font: { size: 10 }, padding: 6 }
+      },
+      tooltip: { bodyFont: { size: 11 }, titleFont: { size: 11 } }
+    },
+    scales: {
+      x: {
+        ticks: { maxTicksLimit: 6, font: { size: 10 } },
+        grid: { display: false }
+      },
+      y: {
+        ticks: { font: { size: 10 }, callback: v => v.toFixed(0) },
+        grid: { color: '#f1f5f9' }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
