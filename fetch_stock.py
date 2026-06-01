@@ -67,23 +67,26 @@ def fetch_and_append():
         sys.exit(1)
 
     today = date.today()
-    yesterday = today - timedelta(days=1)
+
+    # Script chạy lúc 18:00 sau khi thị trường đóng cửa (14:45)
+    # → fetch đến hôm nay để có data trong ngày
+    fetch_end = today
 
     # ── Xác định khoảng ngày cần fetch ───────────────────────────────────────
     latest_str = get_latest_date_in_csv()
 
     if latest_str is None:
         fetch_start = today - timedelta(days=LOOKBACK_DAYS)
-        log.info(f"Chưa có data → fetch {LOOKBACK_DAYS} ngày: {fetch_start} → {yesterday}")
+        log.info(f"Chưa có data → fetch {LOOKBACK_DAYS} ngày: {fetch_start} → {fetch_end}")
     else:
         fetch_start = date.fromisoformat(latest_str) + timedelta(days=1)
-        if fetch_start > yesterday:
+        if fetch_start > fetch_end:
             log.info(f"Data đã up-to-date (latest: {latest_str}). Không có gì để fetch.")
             sys.exit(0)
         log.info(f"Fetch từ {fetch_start} → {yesterday}")
 
     start_str = fetch_start.strftime("%Y-%m-%d")
-    end_str = yesterday.strftime("%Y-%m-%d")
+    end_str = fetch_end.strftime("%Y-%m-%d")
 
     # ── Tạo thư mục data nếu chưa có ─────────────────────────────────────────
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
