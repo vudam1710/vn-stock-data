@@ -4,7 +4,7 @@ on:
   schedule:
     # Chạy lúc 13:00 UTC = 20:00 giờ Việt Nam, thứ 2 đến thứ 6
     # Sau khi fetch (18:00) và Routine phân tích (19:00) đã xong
-    - cron: '07 14 * * 1-5'
+    - cron: '03 13 * * 1-5'
   workflow_dispatch:
 
 jobs:
