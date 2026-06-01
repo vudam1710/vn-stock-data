@@ -83,7 +83,7 @@ def fetch_and_append():
         if fetch_start > fetch_end:
             log.info(f"Data đã up-to-date (latest: {latest_str}). Không có gì để fetch.")
             sys.exit(0)
-        log.info(f"Fetch từ {fetch_start} → {yesterday}")
+        log.info(f"Fetch từ {fetch_start} → {fetch_end}")
 
     start_str = fetch_start.strftime("%Y-%m-%d")
     end_str = fetch_end.strftime("%Y-%m-%d")
