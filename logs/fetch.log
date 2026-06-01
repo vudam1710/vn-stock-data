@@ -28,3 +28,20 @@
 2026-05-31 14:35:21,035 [WARNING] MSN: Không có data trong khoảng này
 2026-05-31 14:35:24,899 [WARNING] BID: Không có data trong khoảng này
 2026-05-31 14:35:24,899 [INFO] === Xong: 0/10 tickers | 0 dòng mới ===
+2026-06-01 12:57:45,474 [ERROR] Lỗi import vnstock: ModuleNotFoundError: No module named 'vnstock'
+2026-06-01 12:58:16,220 [INFO] Fetch từ 2026-05-30 → 2026-05-31
+2026-06-01 12:58:16,500 [INFO] Failed to extract font properties from /usr/share/fonts/truetype/noto/NotoColorEmoji.ttf: Can not load face (unknown file format; error code 0x2)
+2026-06-01 12:58:16,555 [INFO] generated new fontManager
+2026-06-01 12:58:17,928 [INFO] Device registered: 4f556c6a390f51a497c06869c4e4470d (version 0.0.1)
+2026-06-01 12:58:18,636 [ERROR] Non-200 response fetching content: 403
+2026-06-01 12:58:20,247 [ERROR] VCB: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:20,946 [ERROR] VIC: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:22,148 [ERROR] VHM: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:22,448 [ERROR] HPG: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:22,947 [ERROR] TCB: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:23,012 [ERROR] MBB: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:23,421 [ERROR] VNM: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:23,731 [ERROR] FPT: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:23,798 [ERROR] MSN: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:23,865 [ERROR] BID: Lỗi — Failed to fetch data: 403 - Forbidden
+2026-06-01 12:58:23,865 [INFO] === Xong: 0/10 tickers | 0 dòng mới ===
