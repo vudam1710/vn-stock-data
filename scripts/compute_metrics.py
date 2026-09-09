@@ -1,147 +1,151 @@
 #!/usr/bin/env python3
-"""Tính metrics 30 ngày gần nhất cho từng ticker trong config.yaml.
-
-Chỉ dùng stdlib (không có pandas trong runner).
-Output: data/pipeline/stock_metrics.json
-"""
+"""Tính metrics mô tả cho từng ticker từ 30 phiên gần nhất trong data/stock_data.csv."""
 
 import csv
 import json
 import os
-import re
 import statistics
 from collections import defaultdict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSV_PATH = os.path.join(ROOT, "data", "stock_data.csv")
-CONFIG_PATH = os.path.join(ROOT, "config.yaml")
 OUT_PATH = os.path.join(ROOT, "data", "pipeline", "stock_metrics.json")
+CONFIG_PATH = os.path.join(ROOT, "config.yaml")
 
-WINDOW = 30  # số phiên gần nhất
+WINDOW = 30
+VOL_RECENT = 7
 
 
-def read_tickers(path):
-    """Đọc danh sách tickers từ config.yaml mà không cần PyYAML."""
-    tickers = []
-    in_block = False
-    with open(path, encoding="utf-8") as f:
+def load_tickers():
+    """Đọc danh sách tickers từ config.yaml (không hardcode)."""
+    tickers, in_block = [], False
+    with open(CONFIG_PATH, encoding="utf-8") as f:
         for line in f:
-            if re.match(r"^tickers\s*:", line):
+            stripped = line.strip()
+            if stripped.startswith("tickers:"):
                 in_block = True
                 continue
             if in_block:
-                m = re.match(r"^\s+-\s*([A-Za-z0-9.]+)", line)
-                if m:
-                    tickers.append(m.group(1))
-                elif line.strip() and not line.strip().startswith("#"):
+                if stripped.startswith("- "):
+                    tickers.append(stripped[2:].strip())
+                elif stripped and not stripped.startswith("#"):
                     break
     return tickers
 
 
 def slope(values):
-    """Least-squares slope trên index 0..n-1."""
+    """Slope của linear regression theo index, chuẩn hoá thành %/phiên."""
     n = len(values)
-    xm = (n - 1) / 2
-    ym = sum(values) / n
-    num = sum((i - xm) * (v - ym) for i, v in enumerate(values))
-    den = sum((i - xm) ** 2 for i in range(n))
-    return num / den if den else 0.0
+    mean_x = (n - 1) / 2
+    mean_y = sum(values) / n
+    num = sum((i - mean_x) * (v - mean_y) for i, v in enumerate(values))
+    den = sum((i - mean_x) ** 2 for i in range(n))
+    if den == 0 or mean_y == 0:
+        return 0.0
+    return (num / den) / mean_y * 100
+
+
+def classify_trend(slope_pct):
+    if slope_pct > 0.15:
+        return "tăng"
+    if slope_pct < -0.15:
+        return "giảm"
+    return "sideway"
 
 
 def main():
-    tickers = read_tickers(CONFIG_PATH)
+    tickers = load_tickers()
+    rows_by_ticker = defaultdict(list)
+    all_dates = set()
 
-    rows = defaultdict(list)
-    with open(CSV_PATH, encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            try:
-                close = float(r["Close"])
-                vol = float(r["Volume"])
-            except (TypeError, ValueError):
-                continue  # bỏ qua dòng thiếu data
-            rows[r["Ticker"]].append((r["Date"], close, vol))
+    with open(CSV_PATH, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            all_dates.add(row["Date"])
+            rows_by_ticker[row["Ticker"]].append(row)
 
-    all_dates = sorted({d for t in rows.values() for d, _, _ in t})
-    latest_date = all_dates[-1]
-    window_dates = all_dates[-WINDOW:]
+    dates = sorted(all_dates)
+    window_dates = set(dates[-WINDOW:])
+    latest_date = dates[-1]
 
-    metrics = {}
-    missing = []
+    metrics, missing = [], []
 
-    for tk in tickers:
-        series = sorted(rows.get(tk, []))
-        series = [s for s in series if s[0] >= window_dates[0]]
-        if len(series) < 5:
-            missing.append(tk)
+    for ticker in tickers:
+        rows = sorted(
+            (r for r in rows_by_ticker.get(ticker, []) if r["Date"] in window_dates),
+            key=lambda r: r["Date"],
+        )
+        if len(rows) < 3:
+            missing.append(ticker)
             continue
 
-        closes = [c for _, c, _ in series]
-        vols = [v for _, _, v in series]
+        closes = [float(r["Close"]) for r in rows]
+        volumes = [float(r["Volume"]) for r in rows]
 
-        rets = [(closes[i] / closes[i - 1] - 1) * 100 for i in range(1, len(closes))]
-        vol_pct = statistics.stdev(rets) if len(rets) > 1 else 0.0
-        ret_30d = (closes[-1] / closes[0] - 1) * 100
-
+        ret = (closes[-1] / closes[0] - 1) * 100
+        daily = [(closes[i] / closes[i - 1] - 1) * 100 for i in range(1, len(closes))]
+        vol = statistics.pstdev(daily) if len(daily) > 1 else 0.0
         sl = slope(closes)
-        sl_pct = sl / statistics.mean(closes) * 100  # %/phiên, chuẩn hoá theo giá
-        if sl_pct > 0.1:
-            trend = "tăng"
-        elif sl_pct < -0.1:
-            trend = "giảm"
-        else:
-            trend = "sideway"
 
-        avg_all = statistics.mean(vols)
-        avg_7 = statistics.mean(vols[-7:]) if len(vols) >= 7 else avg_all
-        vol_trend = (avg_7 / avg_all - 1) * 100 if avg_all else 0.0
+        recent_vol = volumes[-VOL_RECENT:]
+        avg_recent = sum(recent_vol) / len(recent_vol)
+        avg_all = sum(volumes) / len(volumes)
+        vol_trend = (avg_recent / avg_all - 1) * 100 if avg_all else 0.0
 
-        metrics[tk] = {
-            "ticker": tk,
-            "sessions": len(series),
-            "first_date": series[0][0],
-            "last_date": series[-1][0],
-            "last_close": round(closes[-1], 2),
-            "return_30d_pct": round(ret_30d, 2),
-            "volatility_pct": round(vol_pct, 2),
-            "trend": trend,
-            "trend_slope_pct_per_session": round(sl_pct, 3),
+        metrics.append({
+            "ticker": ticker,
+            "sessions": len(rows),
+            "first_date": rows[0]["Date"],
+            "last_date": rows[-1]["Date"],
+            "close_first": round(closes[0], 2),
+            "close_last": round(closes[-1], 2),
+            "return_30d_pct": round(ret, 2),
+            "volatility_pct": round(vol, 2),
+            "trend_slope_pct_per_session": round(sl, 3),
+            "trend": classify_trend(sl),
             "volume_trend_pct": round(vol_trend, 1),
-            "risk_adjusted": round(ret_30d / vol_pct, 2) if vol_pct else 0.0,
+            "avg_volume": int(avg_all),
             "closes": [round(c, 2) for c in closes],
-            "dates": [d for d, _, _ in series],
-        }
+            "dates": [r["Date"] for r in rows],
+        })
 
-    # Xếp hạng: risk-adjusted return là trục chính, cộng thưởng cho trend tăng
-    def score(m):
-        bonus = {"tăng": 0.5, "sideway": 0.0, "giảm": -0.5}[m["trend"]]
-        return m["risk_adjusted"] + bonus
+    # Điểm risk-adjusted: return / rủi ro, cộng thêm điểm trend
+    for m in metrics:
+        risk = max(m["volatility_pct"], 0.3)
+        m["score"] = round(m["return_30d_pct"] / risk + m["trend_slope_pct_per_session"] * 2, 3)
 
-    ranked = sorted(metrics.values(), key=score, reverse=True)
-    for i, m in enumerate(ranked):
+    metrics.sort(key=lambda m: m["score"], reverse=True)
+
+    n = len(metrics)
+    top_n = 3
+    bottom_n = 3 if n >= 8 else max(1, n // 3)
+    for i, m in enumerate(metrics):
         m["rank"] = i + 1
-        m["score"] = round(score(m), 2)
-        m["group"] = "buy" if i < 3 else ("watch" if i < 7 else "avoid")
+        if i < top_n:
+            m["group"] = "nen_xem_xet"
+        elif i >= n - bottom_n:
+            m["group"] = "tranh_cho"
+        else:
+            m["group"] = "theo_doi_them"
 
     out = {
         "generated_for_data_date": latest_date,
-        "window_sessions": len(window_dates),
-        "window_start": window_dates[0],
+        "window_sessions": len(dates[-WINDOW:]),
+        "window_start": dates[-WINDOW:][0],
+        "window_end": latest_date,
+        "total_dates_in_file": len(dates),
         "missing_tickers": missing,
-        "ranking": [m["ticker"] for m in ranked],
-        "metrics": {m["ticker"]: m for m in ranked},
+        "metrics": metrics,
     }
 
     os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
 
-    print(f"latest_date={latest_date} window={window_dates[0]}..{latest_date} missing={missing}")
-    for m in ranked:
-        print(
-            f"{m['rank']:2d}. {m['ticker']:4s} ret={m['return_30d_pct']:7.2f}% "
-            f"vol={m['volatility_pct']:5.2f}% trend={m['trend']:8s} "
-            f"volΔ={m['volume_trend_pct']:6.1f}% RA={m['risk_adjusted']:6.2f} -> {m['group']}"
-        )
+    print(json.dumps({k: v for k, v in out.items() if k != "metrics"}, ensure_ascii=False))
+    for m in metrics:
+        print(f"{m['rank']:2d} {m['ticker']:4s} ret={m['return_30d_pct']:7.2f}% "
+              f"vol={m['volatility_pct']:5.2f}% trend={m['trend']:8s} "
+              f"volΔ={m['volume_trend_pct']:7.1f}% score={m['score']:7.2f} [{m['group']}]")
 
 
 if __name__ == "__main__":

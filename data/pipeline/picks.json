@@ -1,0 +1,8 @@
+{
+  "order": ["FPT", "MBB", "VIC"],
+  "notes": {
+    "FPT": "Dẫn đầu risk-adjusted: tăng 11.9% trong 30 phiên với volatility chỉ 1.96% — mức sinh lời cao nhưng đường giá không giật mạnh. Slope dương đều đặn (~0.39%/phiên), tức là đà tăng đến từ tích luỹ chứ không phải một phiên bùng nổ. Volume 7 phiên cuối gần như đi ngang (+3%), cho thấy dòng tiền vẫn ở lại chứ chưa có dấu hiệu chốt lời ồ ạt.",
+    "MBB": "Lựa chọn phòng thủ trong nhóm dẫn đầu: +9.96% với volatility 1.71%, thấp nhất trong top 3. Trend là mạnh nhất bảng theo slope (~0.43%/phiên) — giá lên gần như tuyến tính suốt cửa sổ quan sát. Điểm cần lưu ý: volume 7 phiên cuối giảm 11% so với trung bình kỳ, nên đà tăng đang mỏng dần và cần volume xác nhận lại.",
+    "VIC": "Return cao nhất toàn bảng (+14.49%) và volume 7 phiên cuối tăng vọt 50% — dòng tiền đang đổ vào rõ rệt. Đổi lại, volatility 2.47% thuộc nhóm cao nhất nên biên độ rung lắc trong phiên lớn hơn hẳn FPT hay MBB. Phù hợp nếu chấp nhận rủi ro cao hơn để lấy return; nên vào từng phần thay vì một lần."
+  }
+}
