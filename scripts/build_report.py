@@ -18,21 +18,17 @@ GROUP_LABEL = {
     "avoid": ("❌", "Tránh / chờ", "avoid"),
 }
 
-# Lý do cho top picks — do story-builder viết, key theo ticker
-PICK_NOTES = {
-    "VNM": "Tăng đều +5.9% với volatility 1.52% — thấp nhất trong 10 mã, nên tỷ suất "
-           "trên mỗi đơn vị rủi ro cao nhất nhóm. Đường giá đi lên gần như không có phiên "
-           "rung lắc mạnh. Điểm trừ: thanh khoản 7 phiên cuối giảm 25% so với trung bình "
-           "cửa sổ, đà tăng đang thiếu dòng tiền xác nhận.",
-    "FPT": "Return 30D +7.8%, gần cao nhất nhóm, mà volatility chỉ 2.08% — hiếm khi có "
-           "cặp số này cùng lúc. Trend tăng rõ, độ dốc dương ổn định suốt cửa sổ. Volume "
-           "7 phiên cuối thấp hơn trung bình 15%, nên theo dõi xem lực mua có quay lại "
-           "khi giá test vùng đỉnh.",
-    "TCB": "Dẫn đầu về return với +8.4% trong 30 phiên và là mã duy nhất trong top 3 có "
-           "volume 7 phiên cuối tăng (+10%) — đà tăng đang được dòng tiền hậu thuẫn. "
-           "Đổi lại volatility 2.44% cao hơn hai mã còn lại, biên độ dao động ngày rộng "
-           "hơn nên vào lệnh cần chấp nhận nhiễu lớn hơn.",
-}
+# Lý do cho top picks — do story-builder viết mỗi ngày vào
+# data/pipeline/picks_notes.json (key theo ticker). Thiếu file thì để trống.
+NOTES_PATH = os.path.join(ROOT, "data", "pipeline", "picks_notes.json")
+
+
+def load_pick_notes():
+    try:
+        with open(NOTES_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
 
 
 def build_chart(metrics, tickers, width=820, height=260):
@@ -112,6 +108,8 @@ def main():
     data_date = data["generated_for_data_date"]
     today = datetime.date.today().isoformat()
 
+    pick_notes = load_pick_notes()
+
     chart_svg, legend = build_chart(metrics, ranking)
 
     rows = []
@@ -142,7 +140,7 @@ def main():
             f'<div class="pick-h"><span class="pick-tk">{tk}</span>'
             f'<span class="pick-m">{m["return_30d_pct"]:+.2f}% · vol {m["volatility_pct"]:.2f}% '
             f'· RA {m["risk_adjusted"]:.2f}</span></div>'
-            f'<p>{PICK_NOTES.get(tk, "")}</p>'
+            f'<p>{pick_notes.get(tk, "")}</p>'
             f"</div>"
         )
 
